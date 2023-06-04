@@ -1,4 +1,4 @@
-entrypoint = ".gitattributes"
+entrypoint = "three_processes.jl"
 
 [interpreter]
 command = ["julia", "-i", "--banner=no"]
