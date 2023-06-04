@@ -16,8 +16,14 @@ struct ProcessC
     alive::Bool
 end
 
+#Define special types for channels
+const ChannelA = Channel{Union{ProcessB, ProcessC}}
+const ChannelB = Channel{Union{ProcessA, ProcessC}}
+const ChannelC = Channel{Union{ProcessA, ProcessB}}
+
+
 # Function for ProcessA to request interaction with other processes
-function request_interaction(a::ProcessA, b_channel, c_channel)
+function request_interaction(a::ProcessA, b_channel::ChannelB, c_channel::ChannelC)
     if a.weight > 50
         println("ProcessA requesting interaction with ProcessB and ProcessC")
         put!(b_channel, a)
@@ -26,7 +32,7 @@ function request_interaction(a::ProcessA, b_channel, c_channel)
 end
 
 # Function for ProcessB to request interaction with other processes
-function request_interaction(b::ProcessB, a_channel, c_channel)
+function request_interaction(b::ProcessB, a_channel::ChannelA, c_channel::ChannelC)
     if is_colored(b.color)
         println("ProcessB requesting interaction with ProcessA and ProcessC")
         put!(a_channel, b)
@@ -35,7 +41,7 @@ function request_interaction(b::ProcessB, a_channel, c_channel)
 end
 
 # Function for ProcessC to request interaction with other processes
-function request_interaction(c::ProcessC, a_channel, b_channel)
+function request_interaction(c::ProcessC, a_channel::ChannelA, b_channel::ChannelB)
     if c.alive
         println("ProcessC requesting interaction with ProcessA and ProcessB")
         put!(a_channel, c)
@@ -56,9 +62,9 @@ function main()
     c = ProcessC(true)
 
     # Create channels for communication
-    a_channel = Channel{Union{ProcessB, ProcessC}}(2)
-    b_channel = Channel{Union{ProcessA, ProcessC}}(2)
-    c_channel = Channel{Union{ProcessA, ProcessB}}(2)
+    a_channel = ChannelA(2)
+    b_channel = ChannelB(2)
+    c_channel = ChannelC(2)
 
     # Spawn threads for each process
     threads = [
